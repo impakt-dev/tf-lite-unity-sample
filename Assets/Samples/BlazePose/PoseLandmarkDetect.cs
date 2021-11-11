@@ -19,6 +19,8 @@ namespace TensorFlowLite
             // x, y, z, w = visibility
             public Vector4[] viewportLandmarks;
             public Vector4[] worldLandmarks;
+
+            public Vector4[] rawLandmarks;
         }
 
         [System.Serializable]
@@ -80,6 +82,7 @@ namespace TensorFlowLite
                 score = 0,
                 viewportLandmarks = new Vector4[LandmarkCount],
                 worldLandmarks = new Vector4[LandmarkCount],
+                rawLandmarks = new Vector4[LandmarkCount]
             };
 
             this.options = options ?? new Options();
@@ -115,6 +118,7 @@ namespace TensorFlowLite
             interpreter.SetInputTensorData(0, input0);
             interpreter.Invoke();
             interpreter.GetOutputTensorData(0, output0);
+            // throw new System.Exception(output0[0].ToString());
             interpreter.GetOutputTensorData(1, output1);
             // interpreter.GetOutputTensorData(2, output2);// not in use
             if (options.useWorldLandmarks)
@@ -176,6 +180,8 @@ namespace TensorFlowLite
                 ));
                 p.w = output0[i * dimensions + 3];
                 result.viewportLandmarks[i] = p;
+
+                result.rawLandmarks[i] = new Vector4(output0[i * dimensions + 0] * SCALE, output0[i * dimensions + 1] * SCALE, output0[i * dimensions + 2] * SCALE, output0[i * dimensions + 3]) ;
 
                 if (p.x < min.x) { min.x = p.x; }
                 if (p.x > max.x) { max.x = p.x; }

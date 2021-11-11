@@ -3,6 +3,8 @@ using Cysharp.Threading.Tasks;
 using TensorFlowLite;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
+
 
 /// <summary>
 /// BlazePose form MediaPipe
@@ -17,6 +19,8 @@ public sealed class BlazePoseSample : MonoBehaviour
     private string poseDetectionModelFile = "coco_ssd_mobilenet_quant.tflite";
     [SerializeField, FilePopup("*.tflite")]
     private string poseLandmarkModelFile = "coco_ssd_mobilenet_quant.tflite";
+    [SerializeField, FilePopup("*.tflite")]
+    private string allActionsModelFile = "coco_ssd_mobilenet_quant.tflite";
     [SerializeField]
     private RawImage cameraView = null;
     [SerializeField]
@@ -35,21 +39,26 @@ public sealed class BlazePoseSample : MonoBehaviour
     private PoseDetect poseDetect;
     private PoseLandmarkDetect poseLandmark;
 
+    private ActionClassifier actionClassifier;
+
     private Vector4[] viewportLandmarks;
     private PrimitiveDraw draw;
     private PoseDetect.Result poseResult;
     private PoseLandmarkDetect.Result landmarkResult;
+    private ActionClassifier.Result actionResult;
     private UniTask<bool> task;
     private CancellationToken cancellationToken;
 
     private bool NeedsDetectionUpdate => poseResult == null || poseResult.score < 0.5f;
+
 
     private void Start()
     {
         // Init model
         poseDetect = new PoseDetect(poseDetectionModelFile);
         poseLandmark = new PoseLandmarkDetect(poseLandmarkModelFile, landmarkOptions);
-     
+        actionClassifier = new ActionClassifier(allActionsModelFile);
+    
         draw = new PrimitiveDraw(Camera.main, gameObject.layer);
         viewportLandmarks = new Vector4[PoseLandmarkDetect.LandmarkCount];
 
@@ -64,6 +73,7 @@ public sealed class BlazePoseSample : MonoBehaviour
 
         poseDetect?.Dispose();
         poseLandmark?.Dispose();
+        actionClassifier?.Dispose();
         draw?.Dispose();
     }
 
@@ -238,6 +248,38 @@ public sealed class BlazePoseSample : MonoBehaviour
         {
             poseResult = PoseLandmarkDetect.LandmarkToDetection(landmarkResult);
         }
+
+        string p9 = "This is landmarks: " + landmarkResult.rawLandmarks[0].x + ", " +landmarkResult.rawLandmarks[0].y + ", " + landmarkResult.rawLandmarks[0].z;
+        print(p9);
+
+        float cameraHeight = 720f;
+        float cameraWidth = 1280f;
+
+        float[] inputFinal = new float[69];
+        Vector4[] normalizedViewportLandmarks = actionClassifier.NormalizePoseLandmarks(landmarkResult.rawLandmarks, cameraWidth, cameraHeight);
+        // print("normalized landmarks:");
+        // print(normalizedViewportLandmarks[0]);
+        inputFinal = actionClassifier.ConvertToEmbedding(normalizedViewportLandmarks);
+
+        string p0 = "This is input embedding: ";
+        foreach(var item in inputFinal)
+        {
+            p0 = p0 + item + ", ";
+        }
+        print(p0);
+
+
+        actionClassifier.Invoke(inputFinal);
+        actionResult = actionClassifier.GetResult();
+        string p = "Result: ";
+        foreach(var item in actionClassifier.GetResult().classificationResult)
+        {
+            p = p + item + ", ";
+        }
+        print(p);
+
+        print("Final result action:");
+        print(actionResult.classificationResultLabel);
     }
 
     private async UniTask<bool> InvokeAsync(Texture texture)
@@ -276,7 +318,6 @@ public sealed class BlazePoseSample : MonoBehaviour
         {
             poseResult = PoseLandmarkDetect.LandmarkToDetection(landmarkResult);
         }
-
         return true;
     }
 }

@@ -544,6 +544,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   poseDetectionModelFile: mediapipe/pose_detection.tflite
   poseLandmarkModelFile: mediapipe/pose_landmark_lite.tflite
+  allActionsModelFile: impaktML/allActions.tflite
   cameraView: {fileID: 2074584278}
   debugView: {fileID: 1302103928}
   canvas: {fileID: 1051232097}
