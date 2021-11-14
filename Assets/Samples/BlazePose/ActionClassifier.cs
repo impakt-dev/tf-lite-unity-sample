@@ -151,7 +151,6 @@ namespace TensorFlowLite
             float[] embeddingFlat = new float[69];
 
             float[][] embedding = new float[23][];
-            // throw new Exception("KK:" + viewportLandmarks.Length);
 
             embedding[0] = MidPointDistance(viewportLandmarks[23], viewportLandmarks[24], viewportLandmarks[11], viewportLandmarks[12]);
 
@@ -206,9 +205,9 @@ namespace TensorFlowLite
         private float[] MidPointDistance(Vector4 firstLandmark, Vector4 secondLandmark, Vector4 thirdLandmark, Vector4 fourthLandmark)
         {
             float[] distance = new float[3];
-            distance[0] = (firstLandmark.x + secondLandmark.x) * 0.5f - (thirdLandmark.x + fourthLandmark.x) * 0.5f;
-            distance[1] = (firstLandmark.y + secondLandmark.y) * 0.5f - (thirdLandmark.y + fourthLandmark.y) * 0.5f;
-            distance[2] = (firstLandmark.z + secondLandmark.z) * 0.5f - (thirdLandmark.z + fourthLandmark.z) * 0.5f;
+            distance[0] = (thirdLandmark.x + fourthLandmark.x) * 0.5f - (firstLandmark.x + secondLandmark.x) * 0.5f;
+            distance[1] = (thirdLandmark.y + fourthLandmark.y) * 0.5f - (firstLandmark.y + secondLandmark.y) * 0.5f;
+            distance[2] = (thirdLandmark.z + fourthLandmark.z) * 0.5f - (firstLandmark.z + secondLandmark.z) * 0.5f;
             return distance;
         }
 
@@ -224,11 +223,8 @@ namespace TensorFlowLite
                 temViewportLandmarks[i].z = viewportLandmarks[i].z * 0;
                 temViewportLandmarks[i].w = viewportLandmarks[i].w;
             }
-            // throw new Exception(width.ToString() + ", " + height.ToString());
-            // throw new Exception("HI:" + temViewportLandmarks[0].x.ToString() + " , " + temViewportLandmarks[0].y.ToString() + " , " + temViewportLandmarks[0].z.ToString());
 
             Vector4 pose_center = GetPoseCenter(temViewportLandmarks);
-            // throw new Exception("HI: " + pose_center.x + ", "+ pose_center.y);
 
             for (int i = 0; i < temViewportLandmarks.Length; ++i)
             {
@@ -252,12 +248,10 @@ namespace TensorFlowLite
 
         private Vector4 GetPoseCenter(Vector4[] viewportLandmarks)
         {
-            // throw new Exception("HI:" + viewportLandmarks[23].y.ToString());
             //Hip center
             Vector4 poseCenter = new Vector4(0, 0, 0, 0);
             poseCenter.x = (viewportLandmarks[23].x + viewportLandmarks[24].x) * 0.5f;
             poseCenter.y = (viewportLandmarks[23].y + viewportLandmarks[24].y) * 0.5f;
-            // throw new Exception("OK: " + viewportLandmarks[23].y.ToString() + ", " + viewportLandmarks[24].y.ToString());
             poseCenter.z = (viewportLandmarks[23].z + viewportLandmarks[24].z) * 0.5f;
             poseCenter.w = (viewportLandmarks[23].w + viewportLandmarks[24].w) * 0.5f;
             return poseCenter;
