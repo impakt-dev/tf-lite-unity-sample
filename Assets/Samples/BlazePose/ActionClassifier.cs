@@ -12,6 +12,7 @@ namespace TensorFlowLite
     {
         public class Result
         {
+            public float confidence;
             public float[] classificationResult;
             public string classificationResultLabel;
         }
@@ -26,6 +27,7 @@ namespace TensorFlowLite
 
             result = new Result()
             {
+                confidence = 0f,
                 classificationResult = new float[12],
                 classificationResultLabel = "None"
             };
@@ -64,6 +66,7 @@ namespace TensorFlowLite
 
             float MaxValue = 0;
             int MaxIndex = 0;
+
             for (int i = 0; i < output0.Length; ++i)
             {
                 if (output0[i] > MaxValue)
@@ -72,6 +75,7 @@ namespace TensorFlowLite
                     MaxIndex = i;
                 }
             }
+            result.confidence = MaxValue;
 
             result.classificationResultLabel = label[MaxIndex];
 

@@ -280,6 +280,7 @@ public sealed class BlazePoseSample : MonoBehaviour
 
         print("Final result action:");
         print(actionResult.classificationResultLabel);
+        print("Confidence: " + actionResult.confidence.ToString());
     }
 
     private async UniTask<bool> InvokeAsync(Texture texture)
